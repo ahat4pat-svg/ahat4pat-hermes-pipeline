@@ -1,0 +1,11 @@
+{
+  "name": "AHat4Pat Pipeline Trigger",
+  "nodes": [
+    {"name": "Cron Trigger", "type": "n8n-nodes-base.cron", "parameters": {"cronExpression": "0 9 * * *"}},
+    {"name": "Read project.json", "type": "n8n-nodes-base.readBinaryFile"},
+    {"name": "Execute Claude Code", "type": "n8n-nodes-base.executeCommand",
+     "parameters": {"command": "claude 'Continue pipeline for {{$node[\"Read project.json\"].json[\"project_id\"]}}'"}},
+    {"name": "Upload MP4 to R2", "type": "n8n-nodes-base.s3"},
+    {"name": "Publish to YouTube", "type": "n8n-nodes-base.youtube"}
+  ]
+}

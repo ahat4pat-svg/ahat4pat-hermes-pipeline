@@ -1,0 +1,211 @@
+{
+  "_comment": "Patou-Overseer targets — 7 sources surveillées indépendamment. DRY_RUN=1 par défaut. Pat alerté DIRECTEMENT si dérive (pas via Claude).",
+  "version": "1.0",
+  "last_updated": "2026-06-04",
+  "scan_schedule": ["09:00", "20:00"],
+  "telegram_bot_token_env": "TELEGRAM_BOT_TOKEN_PATOU",
+  "telegram_chat_id_env": "TELEGRAM_CHAT_ID_PAT",
+  "dry_run_env": "DRY_RUN",
+  "journal_path": "~/Documents/Patou-Vault/",
+  "targets": [
+    {
+      "id": "claude-director",
+      "name": "Claude (Director)",
+      "type": "director",
+      "priority": "critical",
+      "checks": [
+        {
+          "name": "org_chart_consistency",
+          "description": "Vérifie que les dernières décisions Claude (dans memory.md) ne contredisent pas l'org chart verrouillé",
+          "method": "diff_against",
+          "reference": "tls/../ORG_CHART.md",
+          "alert_threshold": "any_contradiction"
+        },
+        {
+          "name": "no_executor_drift",
+          "description": "Claude doit déléguer aux TLs, pas exécuter heavy lift lui-même",
+          "method": "pattern_scan",
+          "patterns_anti": ["claude_directly_rendered", "claude_directly_generated_video"],
+          "alert_threshold": "1_occurrence_in_24h"
+        },
+        {
+          "name": "memory_recency",
+          "description": "memory.md updated dans les 7 derniers jours",
+          "method": "file_mtime",
+          "path": "memory.md",
+          "max_age_days": 7
+        }
+      ]
+    },
+    {
+      "id": "tl-faceless-yt",
+      "name": "TL Faceless YT (4 channels)",
+      "type": "tl",
+      "priority": "high",
+      "path": "tls/tl-faceless-yt/",
+      "checks": [
+        {
+          "name": "project_json_status_coherent",
+          "description": "project.json par channel cohérent avec assets réels sur disque",
+          "method": "asset_reconciliation",
+          "paths": [
+            "tls/tl-faceless-yt/channels/c1-stillcraft/",
+            "tls/tl-faceless-yt/channels/c2-loopkeeper/",
+            "tls/tl-faceless-yt/channels/c3-stacklab/",
+            "tls/tl-faceless-yt/channels/c4-karmawatch/"
+          ]
+        },
+        {
+          "name": "no_drift_from_brief",
+          "description": "Vidéos publiées respectent le brief original (titre, durée, structure)",
+          "method": "brief_vs_published_diff",
+          "alert_threshold": "major_deviation"
+        },
+        {
+          "name": "voice_quality_check",
+          "description": "Vidéos n'utilisent JAMAIS default ElevenLabs voices",
+          "method": "voice_id_audit",
+          "forbidden_voices": ["Adam", "Bella", "Antoni", "Rachel", "Sarah"],
+          "alert_threshold": "1_occurrence"
+        },
+        {
+          "name": "speaking_rate_compliance",
+          "description": "Speaking rate dans 0.9-1.2",
+          "method": "metadata_audit",
+          "range": [0.9, 1.2]
+        },
+        {
+          "name": "seo_compliance",
+          "description": "Chapters + description 500+ mots + transcript manuel uploadé",
+          "method": "youtube_api_check",
+          "requirements": ["chapters_present", "description_min_500_words", "manual_transcript_uploaded"]
+        }
+      ]
+    },
+    {
+      "id": "tl-juniors4pat",
+      "name": "TL Juniors4Pat (AI Agents Sales)",
+      "type": "tl",
+      "priority": "high",
+      "path": "tls/tl-juniors4pat/",
+      "checks": [
+        {
+          "name": "waitlist_growth",
+          "description": "Waitlist J4P augmente semaine par semaine",
+          "method": "metric_monitor",
+          "metric": "waitlist_count",
+          "alert_threshold": "no_growth_7_days"
+        },
+        {
+          "name": "client_delivery_sla",
+          "description": "Livraison aux clients dans SLA",
+          "method": "delivery_time_audit",
+          "alert_threshold": "sla_missed"
+        },
+        {
+          "name": "no_drift_from_brief",
+          "description": "Agents livrés conformes au pitch initial",
+          "method": "brief_vs_delivered"
+        }
+      ]
+    },
+    {
+      "id": "tl-freelance",
+      "name": "TL Freelance (Team A IMAP + Team B PME)",
+      "type": "tl",
+      "priority": "medium",
+      "path": "tls/tl-freelance/",
+      "checks": [
+        {
+          "name": "leads_pipeline_health",
+          "description": "Pipeline leads (hot/tied/cold) update quotidien",
+          "method": "pipeline_status_check"
+        },
+        {
+          "name": "drafts_review_backlog",
+          "description": "Drafts Team B PME en attente review Pat ne dépassent pas 100",
+          "method": "count_check",
+          "max_count": 100
+        },
+        {
+          "name": "no_spam_pattern",
+          "description": "Email outreach ne déclenche pas anti-spam (taux ouverture > 20%)",
+          "method": "metric_monitor",
+          "metric": "open_rate",
+          "min_threshold": 0.20
+        }
+      ]
+    },
+    {
+      "id": "tl-voice-services",
+      "name": "TL Voice Services International",
+      "type": "tl",
+      "priority": "low",
+      "path": "tls/tl-voice-services/",
+      "checks": [
+        {
+          "name": "voice_clones_inventory",
+          "description": "Liste des voice clones actifs + dernier usage",
+          "method": "inventory_check"
+        },
+        {
+          "name": "twilio_balance",
+          "description": "Solde Twilio > $20",
+          "method": "api_balance_check",
+          "min_balance": 20
+        }
+      ]
+    },
+    {
+      "id": "tl-kdp-newsletter",
+      "name": "TL KDP / Newsletter / Écriture",
+      "type": "tl",
+      "priority": "medium",
+      "path": "tls/tl-kdp-newsletter/",
+      "checks": [
+        {
+          "name": "newsletter_cadence",
+          "description": "Newsletter envoyée selon cadence prévue (hebdo)",
+          "method": "publication_cadence_check"
+        },
+        {
+          "name": "drafts_pat_voice_compliance",
+          "description": "Drafts respectent voice Pat (signatures, métaphores QC)",
+          "method": "pattern_match",
+          "required_patterns": ["SAAQ", "Maxi", "Lock in", "Regarde ben ça"],
+          "min_occurrences": 1
+        }
+      ]
+    },
+    {
+      "id": "tl-musique",
+      "name": "TL Musique (Pat + Ju, perso)",
+      "type": "tl",
+      "priority": "low",
+      "path": "tls/tl-musique/",
+      "checks": [
+        {
+          "name": "sessions_logged",
+          "description": "Sessions enregistrées avec date + durée",
+          "method": "session_log_check"
+        }
+      ],
+      "_note": "Domaine perso — checks minimaux. Pat ne veut PAS que ce domaine soit business-ifié."
+    }
+  ],
+  "alerts": {
+    "telegram_format": "🐺 Patou alert — {target_name}\n\nCheck failed: {check_name}\nDescription: {description}\nDetails: {details}\n\nPas d'action automatique. Pat décide.",
+    "escalation": {
+      "critical": "immediate",
+      "high": "next_scan",
+      "medium": "daily_summary",
+      "low": "weekly_summary"
+    }
+  },
+  "dry_run_behavior": {
+    "log_only": true,
+    "no_telegram_send": true,
+    "log_path": "~/Documents/Patou-Vault/dry-run-YYYY-MM-DD.log",
+    "_note": "Quand DRY_RUN=0, telegram est activé. Tester 48h en DRY_RUN avant prod."
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "repo_id": "ahat4pat-hermes-pipeline",
+  "version": "0.1.0-scaffold",
+  "last_updated": "2026-06-04",
+  "status": "scaffold-first",
+  "_comment": "Master state file. Scaffold ready. Real implementation pending. Edit only via Claude director ou Pat CEO direct.",
+  "director": {
+    "name": "Claude Code",
+    "model": "claude-opus-4-7"
+  },
+  "executor": {
+    "name": "Hermès Agent",
+    "framework": "NousResearch/hermes-agent",
+    "license": "MIT",
+    "github_stars": 140000
+  },
+  "watchdog": {
+    "name": "Patou-Overseer",
+    "config": "overseer/targets.json",
+    "scan_schedule": ["09:00", "20:00"],
+    "dry_run": true
+  },
+  "team_leaders": [
+    {"id": "tl-faceless-yt", "channels": ["c1-stillcraft", "c2-loopkeeper", "c3-stacklab", "c4-karmawatch"]},
+    {"id": "tl-juniors4pat", "launch_date": "2026-06-09"},
+    {"id": "tl-freelance", "subdivisions": ["team-a-imap", "team-b-pme"]},
+    {"id": "tl-voice-services", "scope": "bilingue QC/EN-CA international"},
+    {"id": "tl-kdp-newsletter", "products": ["Comprenez Claude en 30 pages", "Décodeur IA en français"]},
+    {"id": "tl-musique", "scope": "Pat solo, perso, isolé du business"}
+  ],
+  "stack_locked_2026_06_04": {
+    "video_premium": "Higgs Field Starter ~30$/mo (Seedance 2.0)",
+    "video_free_pro": "Google Flow VEO 3.1 + Nano Banana 2 (Pro plan)",
+    "video_free_backup": ["Meta AI", "Qwen", "Hugging Face"],
+    "voice_premium": "ElevenLabs Pro voice clone pat_custom",
+    "voice_scale": "MiniMax Audio + Google AI Studio TTS",
+    "voice_authentic": "NT1-A + Mackie + GarageBand template figé",
+    "edit_target": "Remotion (React, automatisable Hermès)",
+    "edit_backup": "CapCut manuel",
+    "orchestration": "Hermès Agent + Claude Code + n8n local",
+    "compute": "Modal GPU ($30 starter)",
+    "storage": "Cloudflare R2 (10GB free)",
+    "monetization": ["ClickBank", "Bitly"]
+  },
+  "lexicon": [
+    "AHat4Pat", "Juniors4Pat", "Stillcraft", "Loopkeeper", "Stacklab", "Karmawatch",
+    "Hermès Agent", "Patou-Overseer", "Pat", "Drew style FR-CA"
+  ]
+}
