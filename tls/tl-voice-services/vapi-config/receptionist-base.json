@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "description": "Vapi configuration de base pour AI receptionist québécoise. Cloner et adapter par secteur.",
+    "version": "1.0",
+    "last_updated": "2026-06-04",
+    "documentation": "https://docs.vapi.ai/",
+    "important": "Le voiceId doit être remplacé par un voice ElevenLabs sélectionné via voices/CATALOG.md. JAMAIS default voice."
+  },
+  "name": "AHat4Pat Receptionist Base",
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-2",
+    "language": "fr",
+    "_note": "Deepgram nova-2 supporte mieux français-québécois que Whisper pour temps réel"
+  },
+  "model": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "temperature": 0.5,
+    "_note": "Sonnet 4.6 pour balance qualité/coût/latence. Claude Opus si client haut de gamme.",
+    "systemPrompt": "Tu es la réceptionniste virtuelle [NOM_AGENT] pour [NOM_ENTREPRISE]. Tu réponds en français québécois naturel, ton chaleureux mais professionnel. Tu n'es JAMAIS robotique. Tu ne dis JAMAIS 'En tant qu'IA' — tu te présentes simplement par ton prénom.\n\nObjectif principal : [OBJECTIF_PAR_SECTEUR — booker un RDV / qualifier un lead / router l'appel / prendre un message].\n\nLimites strictes :\n- Tu ne donnes JAMAIS de conseils médicaux/légaux/financiers — tu rediriges vers le professionnel\n- Tu ne fais JAMAIS de promesse au nom de l'entreprise\n- Si la personne est en détresse claire (urgence médicale, suicide), tu rediriges IMMÉDIATEMENT vers 911 ou ressources d'aide\n\nTon de voix :\n- Phrases courtes, naturelles\n- Pas de jargon technique\n- 'Allô' OU 'Bonjour' selon contexte (jamais 'Bonjour à vous')\n- Utilise 'on' plutôt que 'nous' quand c'est naturel\n- Pas de tutoiement par défaut sauf si client le fait en premier\n\nStructure d'appel :\n1. Salutation + se présenter (8 sec max)\n2. Écouter, identifier le besoin (laisser parler)\n3. Confirmer ce qu'on comprend ('Donc si je comprends bien...')\n4. Action ([SELON_SECTEUR])\n5. Recap + sortie polie"
+  },
+  "voice": {
+    "provider": "11labs",
+    "voiceId": "[À_REMPLACER_VOIR_CATALOG]",
+    "stability": 0.5,
+    "similarityBoost": 0.75,
+    "style": 0.3,
+    "useSpeakerBoost": true,
+    "_note": "Stability 0.5 = balance entre consistance et expressivité. Style 0.3 = touche personnalité sans surjeu."
+  },
+  "firstMessage": "[À_DÉFINIR_PAR_SECTEUR]",
+  "voicemailMessage": "Vous avez joint [NOM_ENTREPRISE]. Laissez-moi votre nom, numéro et la raison de votre appel après le bip, on vous rappelle dès que possible.",
+  "endCallMessage": "Merci d'avoir appelé [NOM_ENTREPRISE], bonne journée!",
+  "endCallPhrases": ["bonne journée", "au revoir", "bye", "à plus", "merci au revoir"],
+  "recordingEnabled": true,
+  "_recording_legal": "OBLIGATION : message explicite d'enregistrement à l'ouverture si Québec (Loi sur la protection des renseignements personnels). Voir scripts par secteur.",
+  "maxDurationSeconds": 600,
+  "silenceTimeoutSeconds": 20,
+  "responseDelaySeconds": 0.4,
+  "llmRequestDelaySeconds": 0.1,
+  "numWordsToInterruptAssistant": 2,
+  "_interrupt_note": "Permettre interruption rapide pour conversation naturelle",
+  "backgroundSound": "off",
+  "backchannelingEnabled": true,
+  "_backchanneling": "Génère des 'mhm', 'ok', 'd'accord' naturels pendant que la personne parle",
+  "modelOutputInMessagesEnabled": false,
+  "transportConfigurations": [
+    {
+      "provider": "twilio",
+      "timeout": 60,
+      "record": true
+    }
+  ],
+  "credentials": {
+    "_note": "Ne PAS hardcoder ici. Utiliser variables d'env :",
+    "vapi_api_key": "${VAPI_API_KEY}",
+    "elevenlabs_api_key": "${ELEVENLABS_API_KEY}",
+    "anthropic_api_key": "${ANTHROPIC_API_KEY}",
+    "twilio_account_sid": "${TWILIO_ACCOUNT_SID}",
+    "twilio_auth_token": "${TWILIO_AUTH_TOKEN}",
+    "deepgram_api_key": "${DEEPGRAM_API_KEY}"
+  },
+  "analytics": {
+    "_note": "Capturer pour mesure KPI et upsell",
+    "track_call_duration": true,
+    "track_intent_classification": true,
+    "track_resolution_status": true,
+    "track_sentiment": true
+  }
+}
